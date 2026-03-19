@@ -16,6 +16,10 @@ namespace AsyncToolWindowSample
     [ProvideToolWindow(typeof(SampleToolWindow),
         Style = VsDockStyle.Tabbed, DockedWidth = 300,
         Window = "DocumentWell", Orientation = ToolWindowOrientation.Left)]
+    // Config Editor Tool Window — đăng ký riêng
+    [ProvideToolWindow(typeof(ConfigEditorWindow),
+        Style = VsDockStyle.Tabbed, DockedWidth = 480,
+        Window = "DocumentWell", Orientation = ToolWindowOrientation.Right)]
     [Guid(PackageGuids.PackageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     // §10: register the Options page under Tools › Options
@@ -25,15 +29,16 @@ namespace AsyncToolWindowSample
         supportsAutomation: true)]
     public sealed class MyPackage : AsyncPackage
     {
-        public OutputWindowService OutputWindow { get; private set; }
-        public StatusBarService    StatusBar    { get; private set; }
-        public SelectionService    Selection    { get; private set; }
-        public DocumentService     Document     { get; private set; }
-        public ProjectService      Project      { get; private set; }
-        public EventService        Events       { get; private set; }
-        public OptionsService      Options      { get; private set; }
-        public MenuService         Menu         { get; private set; }
-        public ToolbarService      Toolbar      { get; private set; }
+        public OutputWindowService   OutputWindow   { get; private set; }
+        public StatusBarService      StatusBar      { get; private set; }
+        public SelectionService      Selection      { get; private set; }
+        public DocumentService       Document       { get; private set; }
+        public ProjectService        Project        { get; private set; }
+        public EventService          Events         { get; private set; }
+        public OptionsService        Options        { get; private set; }
+        public MenuService           Menu           { get; private set; }
+        public ToolbarService        Toolbar        { get; private set; }
+        public ConfigurationService  Config         { get; private set; }
 
         protected override async Task InitializeAsync(
             CancellationToken cancellationToken,
@@ -46,6 +51,7 @@ namespace AsyncToolWindowSample
             Document     = new DocumentService(this);
             Project      = new ProjectService(this);
             Options      = new OptionsService(this);
+            Config       = new ConfigurationService(this, OutputWindow);
 
             // EventService needs OutputWindow already constructed
             Events  = new EventService(this, OutputWindow);
@@ -60,6 +66,7 @@ namespace AsyncToolWindowSample
             await OutputWindow.InitializeAsync();
             await StatusBar.InitializeAsync();
             await Selection.InitializeAsync();
+            await Config.InitializeAsync();
 
             // ── Switch to UI thread for everything that needs COM ─────────
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
@@ -70,22 +77,27 @@ namespace AsyncToolWindowSample
             // §6: register the three dynamic OleMenuCommands
             await Menu.InitializeAsync();
 
+            // Register Config Editor open command
+            await ShowConfigEditor.InitializeAsync(this);
+
             OutputWindow.Log("AsyncToolWindowSample loaded successfully.");
             StatusBar.SetText("Async Tool Window Sample loaded.");
         }
 
         public override IVsAsyncToolWindowFactory GetAsyncToolWindowFactory(Guid toolWindowType)
         {
-            return toolWindowType.Equals(Guid.Parse(SampleToolWindow.WindowGuidString))
-                ? this
-                : null;
+            if (toolWindowType.Equals(Guid.Parse(SampleToolWindow.WindowGuidString)))
+                return this;
+            if (toolWindowType.Equals(Guid.Parse(ConfigEditorWindow.WindowGuidString)))
+                return this;
+            return null;
         }
 
         protected override string GetToolWindowTitle(Type toolWindowType, int id)
         {
-            return toolWindowType == typeof(SampleToolWindow)
-                ? SampleToolWindow.Title
-                : base.GetToolWindowTitle(toolWindowType, id);
+            if (toolWindowType == typeof(SampleToolWindow))  return SampleToolWindow.Title;
+            if (toolWindowType == typeof(ConfigEditorWindow)) return ConfigEditorWindow.Title;
+            return base.GetToolWindowTitle(toolWindowType, id);
         }
 
         protected override async Task<object> InitializeToolWindowAsync(
@@ -93,19 +105,37 @@ namespace AsyncToolWindowSample
         {
             var dte = await GetServiceAsync(typeof(EnvDTE.DTE)) as EnvDTE80.DTE2;
 
-            return new SampleToolWindowState
+            // SampleToolWindow state
+            if (toolWindowType == typeof(SampleToolWindow))
             {
-                DTE          = dte,
-                OutputWindow = OutputWindow,
-                StatusBar    = StatusBar,
-                Selection    = Selection,
-                Document     = Document,
-                Project      = Project,
-                Events       = Events,
-                Options      = Options,
-                Menu         = Menu,
-                Toolbar      = Toolbar
-            };
+                return new SampleToolWindowState
+                {
+                    DTE          = dte,
+                    OutputWindow = OutputWindow,
+                    StatusBar    = StatusBar,
+                    Selection    = Selection,
+                    Document     = Document,
+                    Project      = Project,
+                    Events       = Events,
+                    Options      = Options,
+                    Menu         = Menu,
+                    Toolbar      = Toolbar,
+                    Config       = Config
+                };
+            }
+
+            // ConfigEditorWindow state
+            if (toolWindowType == typeof(ConfigEditorWindow))
+            {
+                return new ConfigEditorState
+                {
+                    Config       = Config,
+                    OutputWindow = OutputWindow,
+                    StatusBar    = StatusBar
+                };
+            }
+
+            return null;
         }
 
         protected override void Dispose(bool disposing)

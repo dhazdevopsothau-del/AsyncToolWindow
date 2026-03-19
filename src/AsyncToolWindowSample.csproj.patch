@@ -1,0 +1,21 @@
+<!--
+  PATCH: Thêm các dòng Compile sau vào AsyncToolWindowSample.csproj
+  
+  Trong ItemGroup chứa các Compile Include, thêm:
+-->
+
+    <!-- Configuration Editor (§Config) -->
+    <Compile Include="Services\ConfigurationService.cs" />
+    <Compile Include="Commands\ShowConfigEditor.cs" />
+    <Compile Include="ToolWindows\ConfigEditorWindow.cs" />
+    <Compile Include="ToolWindows\ConfigEditorControl.xaml.cs">
+      <DependentUpon>ConfigEditorControl.xaml</DependentUpon>
+    </Compile>
+
+<!--
+  Trong ItemGroup chứa các Page Include, thêm:
+-->
+    <Page Include="ToolWindows\ConfigEditorControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>

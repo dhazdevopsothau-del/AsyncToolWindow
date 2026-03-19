@@ -25,9 +25,12 @@ namespace AsyncToolWindowSample
         // Existing
         public const int ShowToolWindowId = 0x0100;
 
-        // §6 dynamic commands  (new IDSymbols added to .vsct)
+        // §6 dynamic commands
         public const int CmdIdToggleFeature = 0x0200;
         public const int CmdIdDocAction     = 0x0201;
         public const int CmdIdContextInfo   = 0x0202;
+
+        // §Config — Config Editor window
+        public const int CmdIdConfigEditor  = 0x0300;
     }
 }

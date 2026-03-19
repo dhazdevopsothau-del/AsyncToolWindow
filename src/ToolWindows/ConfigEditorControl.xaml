@@ -1,0 +1,261 @@
+<UserControl x:Class="AsyncToolWindowSample.ToolWindows.ConfigEditorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="780" d:DesignWidth="460"
+             Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+
+    <UserControl.Resources>
+        <!-- Section header style -->
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,12,0,6"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+        </Style>
+        <!-- Label style -->
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="MinWidth" Value="130"/>
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
+        <!-- Input TextBox style -->
+        <Style x:Key="FieldInput" TargetType="TextBox">
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <!-- Hint text style -->
+        <Style x:Key="HintText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Foreground" Value="Gray"/>
+            <Setter Property="Margin" Value="138,0,0,4"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        <!-- Action button -->
+        <Style x:Key="ActionBtn" TargetType="Button">
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Margin" Value="4,0,0,0"/>
+        </Style>
+        <!-- Primary button -->
+        <Style x:Key="PrimaryBtn" TargetType="Button" BasedOn="{StaticResource ActionBtn}">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="16,12,16,16">
+
+            <!-- ══════════════════════════════════════════════════════════ -->
+            <!-- TIÊU ĐỀ                                                   -->
+            <!-- ══════════════════════════════════════════════════════════ -->
+            <TextBlock Text="⚙  Configuration Editor"
+                       FontSize="14" FontWeight="Bold"
+                       Margin="0,0,0,2"/>
+            <TextBlock Text="Thay đổi, lưu và tải lại cấu hình extension."
+                       FontSize="10" Foreground="Gray" Margin="0,0,0,4"/>
+            <Separator Margin="0,4,0,0"/>
+
+            <!-- ══════════════════════════════════════════════════════════ -->
+            <!-- SECTION 1: Connection                                      -->
+            <!-- ══════════════════════════════════════════════════════════ -->
+            <TextBlock Text="🔗  Connection" Style="{StaticResource SectionHeader}"/>
+
+            <!-- ServerUrl -->
+            <DockPanel Margin="0,0,0,2">
+                <TextBlock Text="Server URL" Style="{StaticResource FieldLabel}"/>
+                <TextBox x:Name="TxtServerUrl" Style="{StaticResource FieldInput}"
+                         ToolTip="URL đầy đủ của backend server (bao gồm protocol)"/>
+            </DockPanel>
+            <TextBlock Text="Ví dụ: https://api.example.com/v1" Style="{StaticResource HintText}"/>
+
+            <!-- ApiKey -->
+            <DockPanel Margin="0,0,0,2">
+                <TextBlock Text="API Key" Style="{StaticResource FieldLabel}"/>
+                <PasswordBox x:Name="PwdApiKey" Height="24" Padding="4,2" FontSize="11"
+                             VerticalContentAlignment="Center"
+                             ToolTip="API key xác thực (lưu dưới dạng plain text trong file config)"/>
+            </DockPanel>
+            <TextBlock Text="Để trống nếu không cần xác thực." Style="{StaticResource HintText}"/>
+
+            <!-- TimeoutSeconds -->
+            <DockPanel Margin="0,0,0,2">
+                <TextBlock Text="Timeout (giây)" Style="{StaticResource FieldLabel}"/>
+                <TextBox x:Name="TxtTimeout" Style="{StaticResource FieldInput}" Width="80"
+                         HorizontalAlignment="Left"
+                         ToolTip="Thời gian chờ tối đa cho mỗi request (1–300 giây)"/>
+            </DockPanel>
+            <TextBlock Text="Hợp lệ: 1–300. Mặc định: 30." Style="{StaticResource HintText}"/>
+
+            <!-- ══════════════════════════════════════════════════════════ -->
+            <!-- SECTION 2: Behavior                                        -->
+            <!-- ══════════════════════════════════════════════════════════ -->
+            <TextBlock Text="🔧  Behavior" Style="{StaticResource SectionHeader}"/>
+
+            <!-- MaxResults -->
+            <DockPanel Margin="0,0,0,2">
+                <TextBlock Text="Số kết quả tối đa" Style="{StaticResource FieldLabel}"/>
+                <TextBox x:Name="TxtMaxResults" Style="{StaticResource FieldInput}" Width="80"
+                         HorizontalAlignment="Left"
+                         ToolTip="Số items tối đa trả về trong mỗi lần query (1–1000)"/>
+            </DockPanel>
+            <TextBlock Text="Hợp lệ: 1–1000. Mặc định: 50." Style="{StaticResource HintText}"/>
+
+            <!-- RefreshInterval -->
+            <DockPanel Margin="0,0,0,2">
+                <TextBlock Text="Refresh (phút)" Style="{StaticResource FieldLabel}"/>
+                <TextBox x:Name="TxtRefreshInterval" Style="{StaticResource FieldInput}" Width="80"
+                         HorizontalAlignment="Left"
+                         ToolTip="Khoảng thời gian tự động refresh dữ liệu (phút)"/>
+            </DockPanel>
+            <TextBlock Text="Hợp lệ: 1–60. 0 = tắt auto refresh." Style="{StaticResource HintText}"/>
+
+            <!-- OutputFormat -->
+            <DockPanel Margin="0,0,0,2">
+                <TextBlock Text="Output Format" Style="{StaticResource FieldLabel}"/>
+                <ComboBox x:Name="CmbOutputFormat" Height="24" FontSize="11"
+                          SelectedValuePath="Content" Width="120" HorizontalAlignment="Left"
+                          ToolTip="Định dạng xuất kết quả">
+                    <ComboBoxItem Content="JSON"/>
+                    <ComboBoxItem Content="XML"/>
+                    <ComboBoxItem Content="CSV"/>
+                    <ComboBoxItem Content="Plain Text"/>
+                </ComboBox>
+            </DockPanel>
+            <TextBlock Text="Định dạng dữ liệu khi xuất ra Output Window." Style="{StaticResource HintText}"/>
+
+            <!-- ══════════════════════════════════════════════════════════ -->
+            <!-- SECTION 3: Logging / Debug                                 -->
+            <!-- ══════════════════════════════════════════════════════════ -->
+            <TextBlock Text="📋  Logging &amp; Debug" Style="{StaticResource SectionHeader}"/>
+
+            <!-- EnableLogging -->
+            <DockPanel Margin="0,0,0,6">
+                <TextBlock Text="Enable Logging" Style="{StaticResource FieldLabel}"/>
+                <CheckBox x:Name="ChkEnableLogging" VerticalAlignment="Center"
+                          ToolTip="Bật ghi log các hoạt động của extension ra Output Window"/>
+            </DockPanel>
+
+            <!-- DebugMode -->
+            <DockPanel Margin="0,0,0,4">
+                <TextBlock Text="Debug Mode" Style="{StaticResource FieldLabel}"/>
+                <CheckBox x:Name="ChkDebugMode" VerticalAlignment="Center"
+                          ToolTip="Bật chế độ debug: log chi tiết hơn, hiện stack trace..."/>
+            </DockPanel>
+            <TextBlock Text="⚠ Debug mode có thể làm chậm VS. Chỉ dùng khi cần."
+                       Style="{StaticResource HintText}" Foreground="#C08000"/>
+
+            <Separator Margin="0,10,0,10"/>
+
+            <!-- ══════════════════════════════════════════════════════════ -->
+            <!-- VALIDATION MESSAGE                                         -->
+            <!-- ══════════════════════════════════════════════════════════ -->
+            <Border x:Name="ValidationBorder"
+                    Background="#FFF8E1" BorderBrush="#FFC107" BorderThickness="1"
+                    CornerRadius="3" Padding="8,6" Margin="0,0,0,8"
+                    Visibility="Collapsed">
+                <TextBlock x:Name="TxtValidation" Foreground="#E65100"
+                           FontSize="11" TextWrapping="Wrap"/>
+            </Border>
+
+            <!-- SUCCESS MESSAGE -->
+            <Border x:Name="SuccessBorder"
+                    Background="#E8F5E9" BorderBrush="#4CAF50" BorderThickness="1"
+                    CornerRadius="3" Padding="8,6" Margin="0,0,0,8"
+                    Visibility="Collapsed">
+                <TextBlock x:Name="TxtSuccess" Foreground="#1B5E20"
+                           FontSize="11" TextWrapping="Wrap"/>
+            </Border>
+
+            <!-- ══════════════════════════════════════════════════════════ -->
+            <!-- ACTION BUTTONS                                             -->
+            <!-- ══════════════════════════════════════════════════════════ -->
+            <WrapPanel Margin="0,0,0,8">
+                <Button x:Name="BtnSave" Content="💾  Lưu cấu hình"
+                        Style="{StaticResource PrimaryBtn}"
+                        Click="BtnSave_Click"
+                        Margin="0,0,4,4"
+                        ToolTip="Lưu và áp dụng cấu hình hiện tại vào file"/>
+                <Button x:Name="BtnReset" Content="↩  Reset mặc định"
+                        Style="{StaticResource ActionBtn}"
+                        Click="BtnReset_Click"
+                        Margin="0,0,4,4"
+                        ToolTip="Đặt lại tất cả về giá trị mặc định"/>
+                <Button x:Name="BtnReload" Content="🔄  Tải lại"
+                        Style="{StaticResource ActionBtn}"
+                        Click="BtnReload_Click"
+                        Margin="0,0,0,4"
+                        ToolTip="Tải lại giá trị từ ConfigurationService (bỏ thay đổi chưa lưu)"/>
+            </WrapPanel>
+
+            <!-- ══════════════════════════════════════════════════════════ -->
+            <!-- SECTION: Xem & Test                                        -->
+            <!-- ══════════════════════════════════════════════════════════ -->
+            <TextBlock Text="🧪  Xem &amp; Test" Style="{StaticResource SectionHeader}"/>
+
+            <WrapPanel Margin="0,0,0,8">
+                <Button x:Name="BtnDump" Content="📋  Log tất cả config"
+                        Style="{StaticResource ActionBtn}"
+                        Click="BtnDump_Click"
+                        Margin="0,0,4,4"
+                        ToolTip="Log toàn bộ cấu hình hiện tại ra Output Window"/>
+                <Button x:Name="BtnShowFile" Content="📄  Xem file XML"
+                        Style="{StaticResource ActionBtn}"
+                        Click="BtnShowFile_Click"
+                        Margin="0,0,4,4"
+                        ToolTip="Đọc và log nội dung file XML ra Output Window"/>
+                <Button x:Name="BtnTestGet" Content="🔍  Test Get"
+                        Style="{StaticResource ActionBtn}"
+                        Click="BtnTestGet_Click"
+                        Margin="0,0,0,4"
+                        ToolTip="Thử lấy một số giá trị config bằng typed getters"/>
+            </WrapPanel>
+
+            <!-- ══════════════════════════════════════════════════════════ -->
+            <!-- SECTION: Quick Set (ví dụ lập trình Set)                  -->
+            <!-- ══════════════════════════════════════════════════════════ -->
+            <TextBlock Text="⚡  Quick Set (ví dụ)" Style="{StaticResource SectionHeader}"/>
+            <TextBlock Text="Nhập key và value để set nhanh bằng code (demo API):"
+                       FontSize="10" Foreground="Gray" Margin="0,0,0,6"/>
+
+            <DockPanel Margin="0,0,0,4">
+                <TextBlock Text="Key" Style="{StaticResource FieldLabel}" MinWidth="40"/>
+                <TextBox x:Name="TxtQuickKey" Style="{StaticResource FieldInput}"
+                         Text="ServerUrl"
+                         ToolTip="Tên key cần set (vd: ServerUrl, MaxResults...)"/>
+            </DockPanel>
+            <DockPanel Margin="0,0,0,4">
+                <TextBlock Text="Value" Style="{StaticResource FieldLabel}" MinWidth="40"/>
+                <TextBox x:Name="TxtQuickValue" Style="{StaticResource FieldInput}"
+                         Text="https://new-server.example.com"
+                         ToolTip="Giá trị mới cần set"/>
+            </DockPanel>
+            <Button x:Name="BtnQuickSet" Content="⚡  Set ngay (ConfigurationService.Set)"
+                    Height="28" FontSize="11" HorizontalAlignment="Left"
+                    Padding="12,0" Click="BtnQuickSet_Click"
+                    ToolTip="Gọi ConfigurationService.Set(key, value) – log ra Output"/>
+
+            <Separator Margin="0,10,0,8"/>
+
+            <!-- STATUS BAR -->
+            <Border Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}"
+                    BorderBrush="{DynamicResource {x:Static SystemColors.InfoTextBrushKey}}"
+                    BorderThickness="1" CornerRadius="3" Padding="8,4">
+                <DockPanel>
+                    <TextBlock Text="File: " FontSize="10" Foreground="Gray"
+                               VerticalAlignment="Center"/>
+                    <TextBlock x:Name="TxtFilePath" FontSize="10" Foreground="Gray"
+                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                               Text="(chưa khởi tạo)"/>
+                </DockPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

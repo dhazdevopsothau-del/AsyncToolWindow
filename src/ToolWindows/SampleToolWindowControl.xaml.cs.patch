@@ -1,0 +1,72 @@
+/*
+ * PATCH: Thêm đoạn này vào SampleToolWindowControl.xaml.cs
+ * Thêm các handler sau section §12 (Button_TaggerCount_Click)
+ * VÀ thêm property: private ConfigurationService Config => _state.Config;
+ *
+ * Bước 1: Thêm property vào vùng properties đầu class:
+ *   private ConfigurationService Config => _state.Config;
+ *
+ * Bước 2: Thêm các handlers sau:
+ */
+
+        // ================================================================== //
+        //  §Config CONFIGURATION EDITOR                                       //
+        // ================================================================== //
+
+        private void Button_OpenConfigEditor_Click(object sender, RoutedEventArgs e)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            // Mở Config Editor Tool Window qua package
+            // Cách 1: gọi trực tiếp ExecuteCommand nếu đã đăng ký
+            var dte = _state.DTE;
+            if (dte != null)
+            {
+                try
+                {
+                    dte.ExecuteCommand("AsyncToolWindowSample.ConfigEditor");
+                }
+                catch
+                {
+                    OutputWindow.Log("[Config] Không thể mở Config Editor qua command. " +
+                                     "Dùng View > Other Windows > Config Editor.");
+                }
+            }
+        }
+
+        private void Button_ConfigDump_Click(object sender, RoutedEventArgs e)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            if (_state.Config == null) { OutputWindow.Log("[Config] ConfigurationService chưa khởi tạo."); return; }
+            OutputWindow.Activate();
+            _state.Config.DumpToOutput();
+            StatusBar.SetText("Config: Đã log ra Output.");
+        }
+
+        private void Button_ConfigTestGet_Click(object sender, RoutedEventArgs e)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            if (_state.Config == null) { OutputWindow.Log("[Config] ConfigurationService chưa khởi tạo."); return; }
+            var cfg = _state.Config;
+            OutputWindow.Activate();
+            OutputWindow.Log("[Config] ── Test typed getters ──");
+            OutputWindow.Log($"[Config]  ServerUrl       = \"{cfg.ServerUrl}\"");
+            OutputWindow.Log($"[Config]  MaxResults      = {cfg.MaxResults}");
+            OutputWindow.Log($"[Config]  TimeoutSeconds  = {cfg.TimeoutSeconds}");
+            OutputWindow.Log($"[Config]  EnableLogging   = {cfg.EnableLogging}");
+            OutputWindow.Log($"[Config]  OutputFormat    = \"{cfg.OutputFormat}\"");
+            OutputWindow.Log($"[Config]  RefreshInterval = {cfg.RefreshInterval}");
+            OutputWindow.Log($"[Config]  DebugMode       = {cfg.DebugMode}");
+            OutputWindow.Log("[Config] ── Xong ──");
+            StatusBar.SetText("Config: Test getters xong.");
+        }
+
+        private void Button_ConfigReset_Click(object sender, RoutedEventArgs e)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            if (_state.Config == null) { OutputWindow.Log("[Config] ConfigurationService chưa khởi tạo."); return; }
+            OutputWindow.Activate();
+            _state.Config.ResetToDefaults(log: true);
+            string msg = "[Config] Đã reset về mặc định.";
+            OutputWindow.Log(msg);
+            StatusBar.SetText(msg);
+        }

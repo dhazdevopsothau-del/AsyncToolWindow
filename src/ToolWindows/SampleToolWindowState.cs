@@ -37,5 +37,8 @@ namespace AsyncToolWindowSample.ToolWindows
 
         /// <summary>Toolbar &amp; CommandBar API wrapper (§7).</summary>
         public ToolbarService Toolbar { get; set; }
+
+        /// <summary>Configuration form wrapper (§Config).</summary>
+        public ConfigurationService Config { get; set; }
     }
 }

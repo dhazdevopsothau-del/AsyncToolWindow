@@ -1,71 +1,81 @@
-(feat) 2026-03-19 – §6 Menu & Command + §7 Toolbar & CommandBar
+(feat) 2026-03-19 – §Config Configuration Editor: form cấu hình, lưu XML, typed getters
 
-feat(MenuService): add OleMenuCommand dynamic registration (Section 6)
-feat(ToolbarService): add CommandBar/Toolbar programmatic API (Section 7)
-refactor(PackageGuids): centralise all GUID/ID constants
+feat(ConfigurationService): add full config management with XML persistence
+feat(ConfigEditorWindow): add WPF form tool window for config parameters
+feat(ShowConfigEditor): add command to open Config Editor (View > Other Windows)
 
 Nguyên nhân:
-  §6 (Menu & Command) và §7 (Toolbar & CommandBar) chưa được triển khai trong
-  lần cập nhật trước. Bổ sung để hoàn thiện toàn bộ VS2017-Extension-API-Reference.md.
+  Cần một form UI hoàn chỉnh để người dùng/developer có thể:
+  - Thay đổi các tham số cấu hình mà không cần sửa code
+  - Lưu cấu hình bền vững qua các lần restart VS
+  - Xem và test các giá trị config bằng typed getters
+  - Log mọi thay đổi ra Output Window để debug
 
 Thay đổi chính:
 
-  NEW src/PackageGuids.cs
-    - PackageGuids: PackageGuidString, CommandSetGuidString (+ Guid objects)
-    - PackageIds: ShowToolWindowId=0x0100, CmdIdToggleFeature=0x0200,
-                  CmdIdDocAction=0x0201, CmdIdContextInfo=0x0202
+  NEW src/Services/ConfigurationService.cs
+    - 8 key constants: ServerUrl, ApiKey, MaxResults, TimeoutSeconds,
+      EnableLogging, OutputFormat, RefreshInterval, DebugMode
+    - Persist bằng XML: %AppData%\AsyncToolWindowSample\AsyncToolWindowSample.config.xml
+    - InitializeAsync(): tạo folder, load file (override defaults)
+    - Typed getters: GetString/GetInt/GetBool + 8 typed properties
+    - Set(key, string/int/bool): set + log + ConfigChanged event + auto-save
+    - ResetToDefaults(log): reset + save
+    - DumpToOutput(): log toàn bộ (ApiKey masked)
+    - event ConfigChanged: notify realtime khi có thay đổi
 
-  NEW src/Services/MenuService.cs
-    - InitializeAsync() đăng ký 3 OleMenuCommand
-    - BeforeQueryStatus cho từng command (Enabled/Visible/Checked/Text động)
-    - Toggle: check-mark, Ctrl+Shift+F9, label ON/OFF
-    - DocAction: label = tên file đang mở, disabled khi không có doc
-    - ContextInfo: dual parent (Tools menu + code-editor context menu)
-    - GetSnapshot(), FireToggleCommand(), ExecuteVsCommand(), GetCommandName()
+  NEW src/ToolWindows/ConfigEditorControl.xaml
+    - 3 sections: Connection (ServerUrl, ApiKey, Timeout)
+                  Behavior (MaxResults, RefreshInterval, OutputFormat ComboBox)
+                  Logging & Debug (EnableLogging, DebugMode CheckBox)
+    - Validation border + Success border
+    - Buttons: Lưu, Reset, Tải lại, Log all, Xem XML, Test Get
+    - Quick Set demo: nhập key/value, gọi Config.Set() realtime
 
-  NEW src/Services/ToolbarService.cs
-    - GetAllCommandBars() – liệt kê tất cả VS CommandBars
-    - GetStandardBarInfo(name) – info toolbar theo tên
-    - CreateCustomToolbar() – tạo "AsyncToolWindowSample Toolbar", thêm button FaceId=59
-    - ShowCustomToolbar(), HideCustomToolbar(), DeleteCustomToolbar()
-    - IsCustomToolbarVisible(), OnToolbarButtonClick handler
+  NEW src/ToolWindows/ConfigEditorControl.xaml.cs
+    - PopulateForm(): fill widgets từ ConfigurationService
+    - ValidateForm(): URL format, int range (Timeout 1-300, MaxResults 1-1000...)
+    - 8 event handlers với logging + StatusBar update
 
-  MOD src/VSCommandTable.vsct
-    - Thêm DynamicCmdGroup (parent Tools), ContextMenuGroup (parent code-editor)
-    - Thêm 3 Button entries §6 + dual-parent cho ContextInfo
-    - Thêm KeyBinding Ctrl+Shift+F9 → CmdIdToggleFeature
-    - Thêm 5 IDSymbol trong GuidSymbol
+  NEW src/ToolWindows/ConfigEditorWindow.cs
+    - ConfigEditorState DTO
+    - ConfigEditorWindow : ToolWindowPane (GUID c2d7f8a1-...)
 
-  MOD src/MyPackage.cs
-    - [Guid] dùng PackageGuids.PackageGuidString
-    - construct MenuService, ToolbarService
-    - await Menu.InitializeAsync() sau SwitchToMainThreadAsync
+  NEW src/Commands/ShowConfigEditor.cs
+    - MenuCommand CmdIdConfigEditor (0x0300) → ShowToolWindowAsync
 
-  MOD src/ToolWindows/SampleToolWindowState.cs – +Menu, +Toolbar
-  MOD src/ToolWindows/SampleToolWindowControl.xaml – +5 button §6, +7 button §7
-  MOD src/ToolWindows/SampleToolWindowControl.xaml.cs – +12 handler
-  MOD src/AsyncToolWindowSample.csproj – +PackageGuids.cs, +MenuService.cs, +ToolbarService.cs
-
-  NEW docs/tutorials/menu-toolbar_2026-03-19.md
+  MOD src/PackageGuids.cs – +CmdIdConfigEditor = 0x0300
+  MOD src/VSCommandTable.vsct – +Button CmdIdConfigEditor (View > Other Windows)
+  MOD src/MyPackage.cs – +Config property, +ProvideToolWindow ConfigEditorWindow,
+      +InitializeAsync Config, +GetAsyncToolWindowFactory/Title/State for ConfigEditorWindow
+  MOD src/ToolWindows/SampleToolWindowState.cs – +Config property
+  MOD src/ToolWindows/SampleToolWindowControl.xaml – +4 button §Config
+  MOD src/ToolWindows/SampleToolWindowControl.xaml.cs – +4 handler §Config
+  MOD src/AsyncToolWindowSample.csproj – +5 file entries
+  NEW docs/tutorials/configuration-editor_2026-03-19.md
   MOD CHANGELOG.md
   MOD README.md
 
 Tác dụng:
-  - 3 commands xuất hiện trong Tools menu và (ContextInfo) trong right-click menu code editor.
-  - Ctrl+Shift+F9 toggle feature ON/OFF.
-  - Custom toolbar có thể Create/Show/Hide/Delete từ Tool Window.
-  - Tất cả GUID/ID tập trung trong PackageGuids.cs, không còn magic strings.
+  - Mở Config Editor: View > Other Windows > Config Editor
+  - Form có 8 tham số có thể chỉnh sửa với validation
+  - Mọi thay đổi được log ra Output Window và lưu file XML
+  - Các service khác có thể lấy config qua typed properties (Config.ServerUrl...)
+  - ConfigChanged event cho phép react realtime khi config thay đổi
 
 Files thay đổi:
-  - src/PackageGuids.cs                             (NEW)
-  - src/Services/MenuService.cs                     (NEW)
-  - src/Services/ToolbarService.cs                  (NEW)
+  - src/Services/ConfigurationService.cs              (NEW)
+  - src/ToolWindows/ConfigEditorControl.xaml          (NEW)
+  - src/ToolWindows/ConfigEditorControl.xaml.cs       (NEW)
+  - src/ToolWindows/ConfigEditorWindow.cs             (NEW)
+  - src/Commands/ShowConfigEditor.cs                  (NEW)
+  - src/PackageGuids.cs
   - src/VSCommandTable.vsct
   - src/MyPackage.cs
   - src/ToolWindows/SampleToolWindowState.cs
   - src/ToolWindows/SampleToolWindowControl.xaml
   - src/ToolWindows/SampleToolWindowControl.xaml.cs
   - src/AsyncToolWindowSample.csproj
-  - docs/tutorials/menu-toolbar_2026-03-19.md       (NEW)
+  - docs/tutorials/configuration-editor_2026-03-19.md (NEW)
   - CHANGELOG.md
   - README.md

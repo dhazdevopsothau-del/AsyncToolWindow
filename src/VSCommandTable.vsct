@@ -13,9 +13,6 @@
     <!-- ================================================================ -->
     <Groups>
 
-      <!-- Group under View > Other Windows (houses the Show Tool Window button) -->
-      <!-- (Implicit in the Button definition below; no explicit Group needed)   -->
-
       <!-- Group under Tools menu for the three dynamic commands -->
       <Group guid="guidMyPackageCmdSet" id="DynamicCmdGroup" priority="0x0700">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS"/>
@@ -43,6 +40,17 @@
         </Strings>
       </Button>
 
+      <!-- Config Editor: open Config Editor Tool Window -->
+      <Button guid="guidMyPackageCmdSet" id="CmdIdConfigEditor" priority="0x0101" type="Button">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1"/>
+        <Icon guid="ImageCatalogGuid" id="Settings"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Config Editor</ButtonText>
+          <CommandName>AsyncToolWindowSample.ConfigEditor</CommandName>
+        </Strings>
+      </Button>
+
       <!-- §6 — Toggle command (check-mark, appears in Tools menu) -->
       <Button guid="guidMyPackageCmdSet" id="CmdIdToggleFeature" priority="0x0200" type="Button">
         <Parent guid="guidMyPackageCmdSet" id="DynamicCmdGroup"/>
@@ -54,7 +62,7 @@
         </Strings>
       </Button>
 
-      <!-- §6 — Doc-Action command (label updates with active document name) -->
+      <!-- §6 — Doc-Action command -->
       <Button guid="guidMyPackageCmdSet" id="CmdIdDocAction" priority="0x0201" type="Button">
         <Parent guid="guidMyPackageCmdSet" id="DynamicCmdGroup"/>
         <CommandFlag>DynamicItemStart</CommandFlag>
@@ -65,9 +73,8 @@
         </Strings>
       </Button>
 
-      <!-- §6 — Context-info command (also in code-editor right-click menu) -->
+      <!-- §6 — Context-info command (Tools menu) -->
       <Button guid="guidMyPackageCmdSet" id="CmdIdContextInfo" priority="0x0100" type="Button">
-        <!-- Primary parent: Tools menu group -->
         <Parent guid="guidMyPackageCmdSet" id="DynamicCmdGroup"/>
         <CommandFlag>DefaultDisabled</CommandFlag>
         <Strings>
@@ -76,7 +83,7 @@
         </Strings>
       </Button>
 
-      <!-- §6 — Context-info also exposed in code-editor right-click menu -->
+      <!-- §6 — Context-info also in code-editor right-click menu -->
       <Button guid="guidMyPackageCmdSet" id="CmdIdContextInfo" priority="0x0100" type="Button">
         <Parent guid="guidMyPackageCmdSet" id="ContextMenuGroup"/>
         <CommandFlag>DefaultDisabled</CommandFlag>
@@ -106,10 +113,12 @@
 
     <GuidSymbol name="guidMyPackageCmdSet" value="{9cc1062b-4c82-46d2-adcb-f5c17d55fb85}">
       <!-- Existing -->
-      <IDSymbol name="ShowToolWindowId"  value="0x0100" />
+      <IDSymbol name="ShowToolWindowId"   value="0x0100" />
+      <!-- §Config -->
+      <IDSymbol name="CmdIdConfigEditor"  value="0x0300" />
       <!-- §6 new commands -->
-      <IDSymbol name="DynamicCmdGroup"   value="0x1100" />
-      <IDSymbol name="ContextMenuGroup"  value="0x1200" />
+      <IDSymbol name="DynamicCmdGroup"    value="0x1100" />
+      <IDSymbol name="ContextMenuGroup"   value="0x1200" />
       <IDSymbol name="CmdIdToggleFeature" value="0x0200" />
       <IDSymbol name="CmdIdDocAction"     value="0x0201" />
       <IDSymbol name="CmdIdContextInfo"   value="0x0202" />

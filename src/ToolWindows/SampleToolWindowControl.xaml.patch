@@ -1,0 +1,13 @@
+<!-- 
+  PATCH: Thêm đoạn này vào SampleToolWindowControl.xaml
+  Đặt TRƯỚC thẻ đóng </StackPanel> cuối cùng,
+  SAU section §12 Text Adornment/Tagger.
+-->
+
+            <!-- ── §Config Configuration Editor ──────────────────────── -->
+            <TextBlock Text="── Configuration Editor ──" HorizontalAlignment="Center"
+                       Margin="0,8,0,4" Foreground="Gray" FontSize="11"/>
+            <Button Content="⚙ Mở Config Editor"       Click="Button_OpenConfigEditor_Click"  Width="200" Height="32" Margin="0,0,0,6" />
+            <Button Content="📋 Log Config hiện tại"    Click="Button_ConfigDump_Click"        Width="200" Height="32" Margin="0,0,0,6" />
+            <Button Content="🔍 Test Config Getters"    Click="Button_ConfigTestGet_Click"     Width="200" Height="32" Margin="0,0,0,6" />
+            <Button Content="↩ Reset Config mặc định"  Click="Button_ConfigReset_Click"       Width="200" Height="32" Margin="0,0,0,6" />
