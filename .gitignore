@@ -1,0 +1,131 @@
+# =========================
+# Build output
+# =========================
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+artifacts/
+
+# =========================
+# Visual Studio cache / user files
+# =========================
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# =========================
+# Rider / JetBrains
+# =========================
+.idea/
+*.sln.iml
+
+# =========================
+# ReSharper
+# =========================
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# =========================
+# NuGet
+# =========================
+packages/
+!packages/build/
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Nếu dùng PackageReference thì KHÔNG ignore packages.lock.json
+# packages.lock.json
+
+# =========================
+# Test / coverage
+# =========================
+[Tt]est[Rr]esult*/
+[Bb]enchmark[Dd]ot[Nn]et.Artifacts/
+coverage/
+coverage.*
+*.coverage
+*.coveragexml
+
+# =========================
+# Publish / deploy
+# =========================
+publish/
+*.publishsettings
+
+# =========================
+# VSIX artifacts
+# =========================
+*.vsix
+*.vsixmanifest.backup
+*.vsixlangpack.backup
+
+# Experimental instance / local extension dev files
+*.cache
+*.pkgdef
+
+# =========================
+# Generated files
+# =========================
+Generated\ Files/
+*.g.cs
+*.g.i.cs
+*.generated.cs
+
+# Nếu project có source generator sinh file cần commit thì bỏ các dòng trên
+
+# =========================
+# Local database / temp
+# =========================
+*.mdf
+*.ldf
+*.db
+*.db-shm
+*.db-wal
+*.opendb
+*.VC.db
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Secrets / local env
+# =========================
+.env
+.env.*
+appsettings.Development.json
+secrets.json
+
+# =========================
+# Node.js (nếu extension có webview/frontend)
+# =========================
+node_modules/
+dist/
+build/
+.npm/
+.pnpm-store/
+.yarn/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# =========================
+# Optional: keep important config tracked
+# =========================
+!.editorconfig
+!Directory.Build.props
+!Directory.Build.targets
+!global.json
