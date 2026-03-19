@@ -5,41 +5,85 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Unreleased] – 2026-03-19 (feat: project-events-options-tagger)
+
+### Added
+
+#### `src/Services/ProjectService.cs` *(new)*
+- `GetSolutionInfo()` – snapshot của solution (path, IsDirty, ProjectCount, ActiveConfig, LastBuildInfo).
+- `BuildSolution()`, `CleanSolution()` – trigger build/clean.
+- `GetAllProjects()` – liệt kê tất cả projects với Assembly, TargetFw, OutputType, OutputPath.
+- `GetActiveDocumentProject()` – project của active document.
+- `GetReferencesOfActiveProject()` – dùng `VSLangProj.VSProject`; trả về Name, Path, Version, Type.
+- `GetProjectItemsOfActiveProject()` – duyệt cây file đệ quy; có Depth, BuildAction, IsFolder.
+- `GetActiveBuildConfig()` – ConfigName, Platform, IsBuildable, OutputPath, Optimize, Defines.
+- **DTOs:** `SolutionInfo`, `ProjectInfo`, `ReferenceInfo`, `ProjectItemInfo`, `BuildConfigInfo`.
+
+#### `src/Services/EventService.cs` *(new)*
+- Subscribe/Unsubscribe tất cả DTE events: Build, Solution, Document, Window, Selection, Debugger.
+- Giữ strong references đến event sinks (tránh GC collect).
+- `EventFired` event để UI layer lắng nghe log messages.
+- `IDisposable` – tự unsubscribe khi package dispose.
+
+#### `src/Services/OptionsService.cs` + `SampleOptionsPage` *(new)*
+- `SampleOptionsPage : DialogPage` – 4 settings: ServerUrl, AutoFormat, MaxLogItems, EnableSelectionLog.
+- `OptionsService` – typed accessors + `OpenOptionsDialog()`.
+- `MyPackage` có `[ProvideOptionPage]` attribute đăng ký page với VS.
+
+#### `src/Tagging/TodoTagger.cs` *(new)*
+- `TodoTaggerProvider` – MEF `ITaggerProvider` với ContentType="text".
+- `TodoTagger` – scan buffer tìm "TODO" (case-insensitive), emit `TextMarkerTag` "HighlightedReference".
+- Singleton per buffer; invalidate toàn bộ file khi buffer thay đổi.
+- Dispose-safe: hủy đăng ký `buffer.Changed`.
+
+#### `docs/tutorials/project-events-options-tagger_2026-03-19.md` *(new)*
+
+### Changed
+
+#### `src/ToolWindows/SampleToolWindowState.cs`
+- Thêm properties: `Project`, `Events`, `Options`.
+
+#### `src/MyPackage.cs`
+- Construct và wire `ProjectService`, `EventService`, `OptionsService`.
+- Thêm `[ProvideOptionPage]` attribute.
+- Override `Dispose()` để gọi `Events.Dispose()`.
+
+#### `src/ToolWindows/SampleToolWindowControl.xaml`
+- Thêm 4 section mới với 12 button:
+  - §5: Show Solution Info, List All Projects, Active Doc Project Info, List References, List Project Files, Active Build Config, Build Solution (7 buttons)
+  - §9: Subscribe to Events, Unsubscribe from Events, Show Event Status (3 buttons)
+  - §10: Show Current Options, Open Options Dialog (2 buttons)
+  - §12: TODO Tagger: Active?, Count TODOs in Buffer (2 buttons)
+
+#### `src/ToolWindows/SampleToolWindowControl.xaml.cs`
+- Thêm 12 handler tương ứng cho tất cả button mới.
+- Thêm helper `LogNoDoc()`.
+
+#### `src/AsyncToolWindowSample.csproj`
+- Thêm Compile entries: `ProjectService.cs`, `EventService.cs`, `OptionsService.cs`, `Tagging\TodoTagger.cs`.
+- Thêm Reference: `VSLangProj` (cần cho `VSProject.References` trong §5).
+
+#### `README.md`
+- Cập nhật Features, Source map cho §5, §9, §10, §12.
+
+---
+
 ## [Unreleased] – 2026-03-19 (fix: CS1061-document-encoding)
 
 ### Fixed
-
-#### `src/Services/DocumentService.cs`
-- **CS1061 (×2) – `'Document' does not contain a definition for 'Encoding'`:**
-  `EnvDTE.Document` (DTE 8.0) không có property `Encoding`. Property này không tồn tại
-  trên interface COM `Document` ở version này.
-  **Fix:** Xóa toàn bộ truy cập `doc.Encoding` và field `Encoding` khỏi `DocumentInfo` DTO.
-  Encoding của file có thể đọc qua `FileInfo` hoặc `StreamReader` ngoài DTE nếu thực sự cần.
-
-#### `src/ToolWindows/SampleToolWindowControl.xaml.cs`
-- Xóa dòng log `[Doc] Encoding : {info.Encoding}` tương ứng khỏi `Button_DocInfo_Click`.
+- `DocumentService.cs` – CS1061: xóa `doc.Encoding` (không tồn tại trong EnvDTE 8.0).
+- `SampleToolWindowControl.xaml.cs` – xóa dòng log Encoding tương ứng.
 
 ---
 
 ## [Unreleased] – 2026-03-19 (feat: document-file-apis)
 
 ### Added
-
-#### `src/Services/DocumentService.cs` *(new file)*
-- `GetActiveDocumentInfo()`, `GetAllOpenDocuments()`, `SaveActiveDocument()`,
-  `SaveActiveDocumentAs()`, `CloseActiveDocument()`, `UndoActiveDocument()`,
-  `OpenFile()`, `NavigateUrl()`, `GetTextDocumentInfo()`, `ReadLines()`,
-  `InsertAtStart()`, `ExecuteCommand()`, `FormatDocument()`, `SaveAll()`, `GoToLine()`.
-- **DTOs:** `DocumentInfo`, `TextDocumentInfo`.
-
-#### `docs/tutorials/document-file-apis_2026-03-19.md`
+- `DocumentService.cs` với đầy đủ Document & File APIs (Section 4).
+- Tutorial: `docs/tutorials/document-file-apis_2026-03-19.md`.
 
 ### Changed
-- `SampleToolWindowState.cs` – thêm `DocumentService Document`.
-- `MyPackage.cs` – construct + wire `DocumentService`.
-- `SampleToolWindowControl.xaml` – 8 button Document & File APIs.
-- `SampleToolWindowControl.xaml.cs` – 8 handler tương ứng.
-- `AsyncToolWindowSample.csproj` – thêm `DocumentService.cs`.
+- `SampleToolWindowState.cs`, `MyPackage.cs`, XAML, `csproj` – integrate DocumentService.
 
 ---
 

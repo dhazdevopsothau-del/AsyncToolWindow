@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\Microsoft.VSSDK.BuildTools.15.7.109\build\Microsoft.VSSDK.BuildTools.props" Condition="Exists('..\packages\Microsoft.VSSDK.BuildTools.15.7.109\build\Microsoft.VSSDK.BuildTools.props')" />
   <PropertyGroup>
@@ -55,13 +55,23 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <!-- Core -->
     <Compile Include="MyPackage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Commands\ShowToolWindow.cs" />
+    <!-- Services -->
     <Compile Include="Services\OutputWindowService.cs" />
     <Compile Include="Services\StatusBarService.cs" />
     <Compile Include="Services\SelectionService.cs" />
     <Compile Include="Services\DocumentService.cs" />
+    <Compile Include="Services\ProjectService.cs" />
+    <Compile Include="Services\EventService.cs" />
+    <Compile Include="Services\OptionsService.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <!-- Tagging (§12) -->
+    <Compile Include="Tagging\TodoTagger.cs" />
+    <!-- Tool Window -->
     <Compile Include="ToolWindows\SampleToolWindow.cs" />
     <Compile Include="ToolWindows\SampleToolWindowControl.xaml.cs">
       <DependentUpon>SampleToolWindowControl.xaml</DependentUpon>
@@ -96,6 +106,10 @@
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="EnvDTE90, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <!-- VSLangProj: needed for VSProject / Reference (§5) -->
+    <Reference Include="VSLangProj, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.CSharp" />

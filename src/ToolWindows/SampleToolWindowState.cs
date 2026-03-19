@@ -22,5 +22,14 @@ namespace AsyncToolWindowSample.ToolWindows
 
         /// <summary>Document &amp; File API wrapper.</summary>
         public DocumentService Document { get; set; }
+
+        /// <summary>Project &amp; Solution API wrapper (Section 5).</summary>
+        public ProjectService Project { get; set; }
+
+        /// <summary>DTE Events wrapper (Section 9).</summary>
+        public EventService Events { get; set; }
+
+        /// <summary>Settings / Options wrapper (Section 10).</summary>
+        public OptionsService Options { get; set; }
     }
 }

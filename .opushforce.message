@@ -1,22 +1,68 @@
-(fix) 2026-03-19 – CS1061 Document.Encoding không tồn tại trong EnvDTE 8.0
+(feat) 2026-03-19 – §5 Project/Solution, §9 DTE Events, §10 Options, §12 TodoTagger
 
-fix(DocumentService): remove doc.Encoding – property does not exist on EnvDTE.Document
+feat(ProjectService): add Project & Solution APIs (Section 5)
+feat(EventService): add DTE Events subscription (Section 9)
+feat(OptionsService): add Settings/Options page (Section 10)
+feat(TodoTagger): add MEF Text Adornment & Tagger (Section 12)
 
 Nguyên nhân:
-  EnvDTE.Document (DTE 8.0 COM interface) không khai báo property Encoding.
-  Compiler báo CS1061 tại DocumentService.cs:81 và :111.
+  Tiếp tục triển khai các phần còn lại của VS2017-Extension-API-Reference.md
+  từ Section 5 đến Section 12 (bỏ qua §6-§7-§8-§11 đã được xử lý riêng hoặc
+  không cần wrapper service vì đã có trong VSCommandTable/ShowToolWindow).
 
-Cách xử lý:
-  - Xóa truy cập doc.Encoding khỏi GetActiveDocumentInfo() và GetAllOpenDocuments().
-  - Xóa field Encoding khỏi DocumentInfo DTO.
-  - Xóa dòng log Encoding trong SampleToolWindowControl.xaml.cs Button_DocInfo_Click.
+Thay đổi chính:
+  NEW src/Services/ProjectService.cs
+    - GetSolutionInfo, GetAllProjects, GetActiveDocumentProject
+    - GetReferencesOfActiveProject (VSLangProj.VSProject)
+    - GetProjectItemsOfActiveProject (recursive)
+    - GetActiveBuildConfig, BuildSolution, CleanSolution
+    - DTOs: SolutionInfo, ProjectInfo, ReferenceInfo, ProjectItemInfo, BuildConfigInfo
+
+  NEW src/Services/EventService.cs
+    - Subscribe/Unsubscribe: BuildEvents, SolutionEvents, DocumentEvents,
+      WindowEvents, SelectionEvents, DebuggerEvents
+    - Giữ strong field references (tránh GC)
+    - EventFired: Action<string> cho UI layer
+    - IDisposable auto-unsubscribe
+
+  NEW src/Services/OptionsService.cs
+    - SampleOptionsPage : DialogPage (4 settings)
+    - OptionsService: typed accessors + OpenOptionsDialog()
+    - MyPackage: [ProvideOptionPage] attribute
+
+  NEW src/Tagging/TodoTagger.cs
+    - MEF ITaggerProvider + ITagger<TextMarkerTag>
+    - ContentType="text", singleton per buffer
+    - Highlight "TODO" tokens, invalidate on change
+    - IDisposable
+
+  MOD src/ToolWindows/SampleToolWindowState.cs – +Project, +Events, +Options
+  MOD src/MyPackage.cs – wire 3 new services, Dispose, ProvideOptionPage
+  MOD src/ToolWindows/SampleToolWindowControl.xaml – 12 new buttons
+  MOD src/ToolWindows/SampleToolWindowControl.xaml.cs – 12 new handlers
+  MOD src/AsyncToolWindowSample.csproj – +VSLangProj ref, +4 Compile entries
+
+  NEW docs/tutorials/project-events-options-tagger_2026-03-19.md
+  MOD CHANGELOG.md
+  MOD README.md
 
 Tác dụng:
-  - Build thành công, không còn CS1061.
-  - Nếu cần encoding thực sự, có thể dùng System.IO.StreamReader(doc.FullName)
-    hoặc System.IO.File.ReadAllBytes để detect BOM ngoài DTE.
+  - Tất cả §5 §9 §10 §12 đã có UI buttons trong Tool Window.
+  - TodoTagger tự động highlight "TODO" trong mọi file text (MEF, không cần click).
+  - EventService subscribe được build/solution/document/window/selection/debugger events.
+  - Options page xuất hiện tại Tools › Options › Async Tool Window Sample › General.
+  - VSLangProj reference thêm để hỗ trợ References API (phải resolve qua VS PrivateAssemblies).
 
 Files thay đổi:
-  - src/Services/DocumentService.cs
+  - src/Services/ProjectService.cs       (NEW)
+  - src/Services/EventService.cs         (NEW)
+  - src/Services/OptionsService.cs       (NEW)
+  - src/Tagging/TodoTagger.cs            (NEW)
+  - src/ToolWindows/SampleToolWindowState.cs
+  - src/MyPackage.cs
+  - src/ToolWindows/SampleToolWindowControl.xaml
   - src/ToolWindows/SampleToolWindowControl.xaml.cs
+  - src/AsyncToolWindowSample.csproj
+  - docs/tutorials/project-events-options-tagger_2026-03-19.md (NEW)
   - CHANGELOG.md
+  - README.md

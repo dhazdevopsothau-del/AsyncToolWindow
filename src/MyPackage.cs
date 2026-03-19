@@ -18,12 +18,20 @@ namespace AsyncToolWindowSample
         Window = "DocumentWell", Orientation = ToolWindowOrientation.Left)]
     [Guid("6e3b2e95-902b-4385-a966-30c06ab3c7a6")]
     [ProvideMenuResource("Menus.ctmenu", 1)]
+    // Section 10: register the Options page under Tools › Options
+    [ProvideOptionPage(typeof(SampleOptionsPage),
+        "Async Tool Window Sample", "General",
+        categoryResourceID: 0, pageNameResourceID: 0,
+        supportsAutomation: true)]
     public sealed class MyPackage : AsyncPackage
     {
         public OutputWindowService OutputWindow { get; private set; }
-        public StatusBarService StatusBar { get; private set; }
-        public SelectionService Selection { get; private set; }
-        public DocumentService Document { get; private set; }
+        public StatusBarService    StatusBar    { get; private set; }
+        public SelectionService    Selection    { get; private set; }
+        public DocumentService     Document     { get; private set; }
+        public ProjectService      Project      { get; private set; }
+        public EventService        Events       { get; private set; }
+        public OptionsService      Options      { get; private set; }
 
         protected override async Task InitializeAsync(
             CancellationToken cancellationToken,
@@ -33,10 +41,15 @@ namespace AsyncToolWindowSample
             StatusBar    = new StatusBarService(this);
             Selection    = new SelectionService(this);
             Document     = new DocumentService(this);
+            Project      = new ProjectService(this);
+            Options      = new OptionsService(this);
 
             await OutputWindow.InitializeAsync();
             await StatusBar.InitializeAsync();
             await Selection.InitializeAsync();
+
+            // EventService requires OutputWindow to be initialised first
+            Events = new EventService(this, OutputWindow);
 
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
@@ -71,8 +84,20 @@ namespace AsyncToolWindowSample
                 OutputWindow = OutputWindow,
                 StatusBar    = StatusBar,
                 Selection    = Selection,
-                Document     = Document
+                Document     = Document,
+                Project      = Project,
+                Events       = Events,
+                Options      = Options
             };
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Events?.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }
